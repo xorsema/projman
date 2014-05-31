@@ -1,23 +1,23 @@
 SHELL	     = {}
 CC	     = {}
-
 FLAGS	     = {}
 CFLAGS	     = {}
 DEBUGFLAGS   = {}
 RELEASEFLAGS = {}
-
 TARGET	     = {}
 SOURCES	     = {}
 HEADERS	     = {}
 OBJECTS	     = {}
+LIBCFLAGS    = {}
+LIBS	     = {}
 
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(FLAGS) $(CFLAGS) $(DEBUGFLAGS) -o $(TARGET) $(OBJECTS)
+	$(CC) $(FLAGS) $(CFLAGS) $(DEBUGFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
 
 release: $(SOURCES) $(HEADERS)
-	$(CC) $(FLAGS) $(CFLAGS) $(RELEASEFLAGS) -o $(TARGET) $(SOURCES)
+	$(CC) $(FLAGS) $(CFLAGS) $(RELEASEFLAGS) $(LIBCFLAGS) $(LIBS) -o $(TARGET) $(SOURCES)
 
 clean:
 	-rm -f $(OBJECTS)
@@ -29,7 +29,7 @@ distclean: clean
 
 $(foreach OBJ,$(OBJECTS),$(eval $(OBJ)_DEPS = $(shell gcc -MM $(OBJ:.o=.c) | sed s/.*://)))
 %.o: %.c $$($$@_DEPS)
-	$(CC) $(FLAGS) $(CFLAGS) $(DEBUGFLAGS) -c -o $@ $<
+	$(CC) $(FLAGS) $(CFLAGS) $(DEBUGFLAGS) $(LIBCFLAGS) -c -o $@ $<
 
 .PHONY : all release \
   clean distclean

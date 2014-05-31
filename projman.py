@@ -5,15 +5,34 @@ MAKEFILE_TEMPLATE_PATH = "template"
 
 MAKE_SHELL        = "/bin/sh"
 MAKE_CC           = "gcc"
+
 MAKE_FLAGS        = "-ansi"
 MAKE_CFLAGS       = "-Wall"
 MAKE_DEBUGFLAGS   = "-O0 -g"
 MAKE_RELEASEFLAGS = "-O2"
 
-MAKE_TARGET  = None
-MAKE_SOURCES = "$(shell echo src/*.c)"
-MAKE_HEADERS = "$(shell echo include/*.h)"
-MAKE_OBJECTS = "$(SOURCES:.c=.o)"
+MAKE_TARGET       = None
+MAKE_SOURCES      = "$(shell echo src/*.c)"
+MAKE_HEADERS      = "$(shell echo include/*.h)"
+MAKE_OBJECTS      = "$(SOURCES:.c=.o)"
+
+MAKE_LIBS         = ""
+MAKE_LIBCFLAGS    = ""
+
+SDL2_LIBS         = "$(shell sdl2-config --libs)"
+SDL2_LIBCFLAGS    = "$(shell sdl2-config --cflags)"
+
+# Libraries that can be added
+def addSDL2():
+    global MAKE_LIBS, MAKE_LIBCFLAGS
+    MAKE_LIBS      += SDL2_LIBS + " "
+    MAKE_LIBCFLAGS += SDL2_LIBCFLAGS + " "
+
+def addOpenGL():
+    global MAKE_LIBS
+    MAKE_LIBS += "-lGL -lGLU"
+
+LIB_FUNCS = dict(sdl2=addSDL2, opengl=addOpenGL)
 
 def confirmPrompt(msg):
     i = None
@@ -44,10 +63,18 @@ def writeMakefile(name):
 
     intext = infile.read()
     MAKE_TARGET = name.split("/").pop()
-    formattedtext = intext.format(MAKE_SHELL, MAKE_CC, MAKE_FLAGS, MAKE_CFLAGS, MAKE_DEBUGFLAGS, MAKE_RELEASEFLAGS, MAKE_TARGET, MAKE_SOURCES, MAKE_HEADERS, MAKE_OBJECTS)
+    formattedtext = intext.format(MAKE_SHELL, MAKE_CC, MAKE_FLAGS, MAKE_CFLAGS, MAKE_DEBUGFLAGS, MAKE_RELEASEFLAGS, MAKE_TARGET, MAKE_SOURCES, MAKE_HEADERS, MAKE_OBJECTS, MAKE_LIBCFLAGS, MAKE_LIBS)
     outfile.write(formattedtext)
     infile.close()
     outfile.close()
+
+def addLibs(libargs):
+    for i in libargs:
+        f = LIB_FUNCS[i]
+        if f is not None:
+            f()
+        else:
+            print "Unknown library {}, ignoring...".format(i)
 
 def main():
     if len(sys.argv) < 3:
@@ -59,8 +86,13 @@ def main():
         if os.path.exists(name):
             if confirmPrompt("overwrite {}".format(name)) == False:
                 sys.exit(1)
+
+        if len(sys.argv) > 3:
+           addLibs(sys.argv[3:])
+
         createDirs(name)
         writeMakefile(name)
+
     elif sys.argv[1] == "rm":
         name = sys.argv[2]
         if confirmPrompt("delete {}".format(name)):
