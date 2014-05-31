@@ -1,0 +1,35 @@
+SHELL	     = {}
+CC	     = {}
+
+FLAGS	     = {}
+CFLAGS	     = {}
+DEBUGFLAGS   = {}
+RELEASEFLAGS = {}
+
+TARGET	     = {}
+SOURCES	     = {}
+HEADERS	     = {}
+OBJECTS	     = {}
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(CC) $(FLAGS) $(CFLAGS) $(DEBUGFLAGS) -o $(TARGET) $(OBJECTS)
+
+release: $(SOURCES) $(HEADERS)
+	$(CC) $(FLAGS) $(CFLAGS) $(RELEASEFLAGS) -o $(TARGET) $(SOURCES)
+
+clean:
+	-rm -f $(OBJECTS)
+
+distclean: clean
+	-rm -f $(TARGET)
+
+.SECONDEXPANSION:
+
+$(foreach OBJ,$(OBJECTS),$(eval $(OBJ)_DEPS = $(shell gcc -MM $(OBJ:.o=.c) | sed s/.*://)))
+%.o: %.c $$($$@_DEPS)
+	$(CC) $(FLAGS) $(CFLAGS) $(DEBUGFLAGS) -c -o $@ $<
+
+.PHONY : all release \
+  clean distclean
