@@ -56,22 +56,24 @@ def writeMakefile(name):
     infile.close()
     outfile.close()
 
-def addPcPkg(pkg):
+def addPcPkgs(pkgs):
     global MAKE_LIBS, MAKE_LIBCFLAGS
-    MAKE_LIBS += MAKE_PC_CFLAGS.format(pkg)
-    MAKE_LIBCFLAGS += MAKE_PC_LIBS.format(pkg)
+    pkgstr = ""
+    for i in pkgs:
+        pkgstr += i + " "
+    MAKE_LIBCFLAGS += MAKE_PC_CFLAGS.format(pkgstr)
+    MAKE_LIBS += MAKE_PC_LIBS.format(pkgstr)
 
 def createProject(args):
     global MAKE_LIBS
     if os.path.exists(args.create_project[0]):
         if confirmPrompt("overwrite {}".format(args.create_project[0])) == False:
             sys.exit(1)
-    if args.libs:
+    if args.pkg_config is not None:
+        addPcPkgs(args.pkg_config)
+    if args.libs is not None:
         for i in args.libs:
             MAKE_LIBS += "-l" + i + " "
-    if args.pkg_config:
-        for i in args.pkg_config:
-            addPcPkg(i)
 
     createDirs(args.create_project[0])
     writeMakefile(args.create_project[0])
