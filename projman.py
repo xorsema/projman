@@ -6,8 +6,8 @@ MAKEFILE_TEMPLATE_PATH = "template"
 MAKE_SHELL        = "/bin/sh"
 MAKE_CC           = "gcc"
 
-MAKE_FLAGS        = "-ansi"
-MAKE_CFLAGS       = "-Wall"
+MAKE_FLAGS        = "-ansi "
+MAKE_CFLAGS       = "-Wall "
 MAKE_DEBUGFLAGS   = "-O0 -g"
 MAKE_RELEASEFLAGS = "-O2"
 
@@ -62,16 +62,13 @@ def addPcPkg(pkg):
     MAKE_LIBCFLAGS += MAKE_PC_LIBS.format(pkg)
 
 def createProject(args):
-    global MAKE_LIBS, MAKE_LIBCFLAGS
+    global MAKE_LIBS, MAKE_CFLAGS
     if os.path.exists(args.create_project[0]):
         if confirmPrompt("overwrite {}".format(args.create_project[0])) == False:
             sys.exit(1)
     if args.libs:
         for i in args.libs:
             MAKE_LIBS += "-l" + i + " "
-    if args.cflags:
-        for i in args.cflags:
-            MAKE_LIBCFLAGS += i
     if args.pkg_config:
         for i in args.pkg_config:
             addPcPkg(i)
@@ -89,7 +86,6 @@ def main():
    group.add_argument("--create-project", "-c", nargs=1)
    group.add_argument("--delete-project", "-d", nargs=1)
    parser.add_argument("--libs", "-l", action='append')
-   parser.add_argument("--cflags", "-cf", action='append')
    parser.add_argument("--pkg-config", "-pc", action='append')
    
    args = parser.parse_args()
