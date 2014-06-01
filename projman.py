@@ -62,7 +62,7 @@ def addPcPkg(pkg):
     MAKE_LIBCFLAGS += MAKE_PC_LIBS.format(pkg)
 
 def createProject(args):
-    global MAKE_LIBS, MAKE_CFLAGS
+    global MAKE_LIBS
     if os.path.exists(args.create_project[0]):
         if confirmPrompt("overwrite {}".format(args.create_project[0])) == False:
             sys.exit(1)
