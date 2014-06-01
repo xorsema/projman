@@ -1,4 +1,4 @@
-import sys, os, shutil
+import sys, os, shutil, argparse
 
 # edit this to point to the makefile template or run the script from this directory
 MAKEFILE_TEMPLATE_PATH = "template"
@@ -76,30 +76,37 @@ def addLibs(libargs):
         else:
             print "Unknown library {}, ignoring...".format(i)
 
+def createProject(args):
+    if os.path.exists(args.create_project[0]):
+        if confirmPrompt("overwrite {}".format(args.create_project[0])) == False:
+            sys.exit(1)
+    if args.libs:
+        for i in args.libs:
+            f = LIB_FUNCS[i]
+            if f is not None:
+                f()
+
+    createDirs(args.create_project[0])
+    writeMakefile(args.create_project[0])
+
+def deleteProject(args):
+    if confirmPrompt("delete {}".format(args.delete_project[0])):
+        shutil.rmtree(args.delete_project[0])
+
 def main():
-    if len(sys.argv) < 3:
-        print "usage: projman.py <mk,rm> <projectname>"
-        sys.exit(1)
-    
-    if sys.argv[1] == "mk":
-        name = sys.argv[2]
-        if os.path.exists(name):
-            if confirmPrompt("overwrite {}".format(name)) == False:
-                sys.exit(1)
-
-        if len(sys.argv) > 3:
-           addLibs(sys.argv[3:])
-
-        createDirs(name)
-        writeMakefile(name)
-
-    elif sys.argv[1] == "rm":
-        name = sys.argv[2]
-        if confirmPrompt("delete {}".format(name)):
-            shutil.rmtree(name)
-    else:
-        print "Unknown command, please try again."
-        sys.exit(1)
+   parser = argparse.ArgumentParser()
+   group = parser.add_mutually_exclusive_group()
+   group.add_argument("--create-project", "-c", nargs=1)
+   group.add_argument("--delete-project", "-d", nargs=1)
+   parser.add_argument("--libs", "-l", action='append')
+   
+   args = parser.parse_args()
+   if args.create_project:
+       createProject(args)
+   elif args.delete_project:
+       deleteProject(args)
+   else:
+       parser.print_help()
 
 if __name__ == '__main__':
     main()
