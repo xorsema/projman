@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys, os, shutil, argparse
 
 # edit this to point to the makefile template or run the script from this directory
@@ -24,9 +26,9 @@ MAKE_PC_CFLAGS    = "$(shell pkg-config {} --cflags) "
 
 def confirmPrompt(msg):
     i = None
-    while  i != "Y" and i != "N":
+    while  i != "Y" and i != "N" and i != "y" and i != "n":
         i = raw_input('Do you wish to {}? Y/N: '.format(msg))
-    return bool(i == "Y")
+    return bool(i == "Y") or bool(i == "y")
 
 def createDirs(name):
     try:
@@ -51,7 +53,9 @@ def writeMakefile(name):
 
     intext = infile.read()
     MAKE_TARGET = name.split("/").pop()
-    formattedtext = intext.format(MAKE_SHELL, MAKE_CC, MAKE_FLAGS, MAKE_CFLAGS, MAKE_DEBUGFLAGS, MAKE_RELEASEFLAGS, MAKE_TARGET, MAKE_SOURCES, MAKE_HEADERS, MAKE_OBJECTS, MAKE_LIBCFLAGS, MAKE_LIBS)
+    formattedtext = intext.format(MAKE_SHELL, MAKE_CC, MAKE_FLAGS, MAKE_CFLAGS,
+		    MAKE_DEBUGFLAGS, MAKE_RELEASEFLAGS, MAKE_TARGET, MAKE_SOURCES,
+		    MAKE_HEADERS, MAKE_OBJECTS, MAKE_LIBCFLAGS, MAKE_LIBS)
     outfile.write(formattedtext)
     infile.close()
     outfile.close()
